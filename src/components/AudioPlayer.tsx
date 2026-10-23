@@ -8,7 +8,7 @@ const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const unlockedRef = useRef(false);
 
-  // Step 1: Start playing MUTED immediately (always allowed by browsers)
+  // Step 1: Start MUTED immediately on mount (always allowed by every browser)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -17,24 +17,35 @@ const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
     audio.volume = 0.75;
     audio.play().catch(() => {});
 
-    // Scroll fallback: if preloader signal never arrives, scroll unmutes
-    const onScroll = () => {
+    const unmute = () => {
       if (unlockedRef.current) return;
       unlockedRef.current = true;
       audio.muted = false;
       if (audio.paused) audio.play().catch(() => {});
-      window.removeEventListener('scroll', onScroll);
+      // Remove all listeners once unlocked
+      window.removeEventListener('scroll', unmute);
+      window.removeEventListener('click', unmute);
+      window.removeEventListener('touchstart', unmute);
+      window.removeEventListener('pointerdown', unmute);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Step 2: Unmute on ANY user interaction — click, scroll, touch, pointer
+    window.addEventListener('scroll',      unmute, { passive: true });
+    window.addEventListener('click',       unmute);
+    window.addEventListener('touchstart',  unmute, { passive: true });
+    window.addEventListener('pointerdown', unmute);
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll',      unmute);
+      window.removeEventListener('click',       unmute);
+      window.removeEventListener('touchstart',  unmute);
+      window.removeEventListener('pointerdown', unmute);
       audio.pause();
       audio.src = '';
     };
   }, []);
 
-  // Step 2: Unmute as soon as preloader signals it's done
+  // Step 3: Unmute when preloader finishes (no interaction needed)
   useEffect(() => {
     if (!unlocked) return;
     const audio = audioRef.current;
@@ -42,10 +53,7 @@ const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
 
     unlockedRef.current = true;
     audio.muted = false;
-
-    if (audio.paused) {
-      audio.play().catch(() => {});
-    }
+    if (audio.paused) audio.play().catch(() => {});
   }, [unlocked]);
 
   return (
