@@ -1,33 +1,30 @@
 import React, { useEffect, useRef } from 'react';
 
-const AudioPlayer: React.FC = () => {
-  const audioRef = useRef<HTMLAudioElement>(null);
+interface Props {
+  unlocked: boolean;
+}
 
+const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const unlockedRef = useRef(false);
+
+  // Step 1: Start playing MUTED immediately (always allowed by browsers)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    let unlocked = false;
-
-    // Step 1: Play muted immediately (always allowed by every browser)
     audio.muted = true;
     audio.volume = 0.75;
     audio.play().catch(() => {});
 
-    // Step 2: Unmute on first scroll
+    // Scroll fallback: if preloader signal never arrives, scroll unmutes
     const onScroll = () => {
-      if (unlocked) return;
-      unlocked = true;
-
+      if (unlockedRef.current) return;
+      unlockedRef.current = true;
       audio.muted = false;
-
-      if (audio.paused) {
-        audio.play().catch(() => {});
-      }
-
+      if (audio.paused) audio.play().catch(() => {});
       window.removeEventListener('scroll', onScroll);
     };
-
     window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
@@ -36,6 +33,20 @@ const AudioPlayer: React.FC = () => {
       audio.src = '';
     };
   }, []);
+
+  // Step 2: Unmute as soon as preloader signals it's done
+  useEffect(() => {
+    if (!unlocked) return;
+    const audio = audioRef.current;
+    if (!audio || unlockedRef.current) return;
+
+    unlockedRef.current = true;
+    audio.muted = false;
+
+    if (audio.paused) {
+      audio.play().catch(() => {});
+    }
+  }, [unlocked]);
 
   return (
     <audio

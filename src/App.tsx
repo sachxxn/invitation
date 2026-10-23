@@ -18,18 +18,25 @@ import AudioPlayer from './components/AudioPlayer';
 export function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isTamil, setIsTamil] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+  const handlePreloaderComplete = () => {
+    setIsLoaded(true);
+    // Preloader finishing = safe moment to unmute audio
+    setAudioUnlocked(true);
+  };
 
   return (
     <div className="min-h-screen bg-[#0D0204] text-[#F9F6F0] selection:bg-[#D4AF37]/30 selection:text-[#F3E5AB]">
-      {/* Background Music — plays immediately on page load */}
-      <AudioPlayer />
+      {/* Background Music — plays muted instantly, unmutes after preloader */}
+      <AudioPlayer unlocked={audioUnlocked} />
 
       {/* Royal Preloader */}
       {!isLoaded && (
         <Preloader
           brideName={weddingData.brideName}
           groomName={weddingData.groomName}
-          onComplete={() => setIsLoaded(true)}
+          onComplete={handlePreloaderComplete}
         />
       )}
 
