@@ -13,7 +13,7 @@ import { FamilySection } from './components/FamilySection';
 import { VenueSection } from './components/VenueSection';
 import { RSVP } from './components/RSVP';
 import { Footer } from './components/Footer';
-import { AudioPlayer } from './components/AudioPlayer';
+import AudioPlayer from './components/AudioPlayer';
 
 export function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -21,6 +21,9 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#0D0204] text-[#F9F6F0] selection:bg-[#D4AF37]/30 selection:text-[#F3E5AB]">
+      {/* Background Music — plays immediately on page load */}
+      <AudioPlayer />
+
       {/* Royal Preloader */}
       {!isLoaded && (
         <Preloader
@@ -66,8 +69,7 @@ export function App() {
         {/* Footer */}
         <Footer isTamil={isTamil} />
 
-        {/* Floating Classical Shehnai / Flute Audio Player */}
-        <AudioPlayer />
+
       </div>
     </div>
   );
