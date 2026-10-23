@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --gold-primary: #d4af37;
+    --gold-light: #f5e6a8;
+    --gold-dark: #996515;
+    --royal-maroon: #3b0910;
+    --deep-maroon: #230408;
+    --cream-bg: #faf6ee;
+    --ivory-paper: #fdfbf7;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  body {
+    background-color: #0d0204;
+    color: #f7f3e9;
+    overflow-x: hidden;
+  }
+}
+
+/* Typography Helpers */
+.font-cinzel-dec {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-alex {
+  font-family: 'Alex Brush', cursive;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.font-tamil {
+  font-family: 'Noto Serif Tamil', serif;
+}
+
+/* Gold Gradient Effects */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #fceda2 0%, #d4af37 40%, #b8860b 70%, #fae69e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-shimmer {
+  background: linear-gradient(90deg, #d4af37 0%, #fff2be 25%, #d4af37 50%, #fff2be 75%, #d4af37 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #fceda2 0%, #d4af37 50%, #996515 100%);
+}
+
+.border-gold-subtle {
+  border-color: rgba(212, 175, 55, 0.35);
+}
+
+.border-gold-glow {
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+}
+
+/* Luxury Paper & Card Textures */
+.bg-cream-card {
+  background-color: #faf6ee;
+  color: #2b080d;
+}
+
+.bg-maroon-card {
+  background: linear-gradient(180deg, rgba(46, 7, 12, 0.92) 0%, rgba(26, 4, 7, 0.96) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+.bg-velvet-dark {
+  background: radial-gradient(circle at 50% 30%, #30060d 0%, #150204 70%, #0a0102 100%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #140305;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5a1b24;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+/* Decorative Keyframe Animations */
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+/* Glassmorphism */
+.glass-gold-nav {
+  background: rgba(22, 3, 6, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
