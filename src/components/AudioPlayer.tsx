@@ -5,43 +5,80 @@ import { anbilAvanEngine } from '../utils/anbilAvanSynth';
 
 export const AudioPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playingRef = useRef(false);
   const startingRef = useRef(false);
   const sourceRef = useRef<'mp3' | 'synth' | null>(null);
 
   useEffect(() => {
-    const audio = new Audio('/audio/anbil_avan.mp3');
+    // MP3 file hosted in the Vercel public directory.
+    const audio = new Audio(
+      `${import.meta.env.BASE_URL}audio/anbil_avan.mp3`
+    );
+
     audio.loop = true;
     audio.volume = 0.75;
     audio.preload = 'auto';
+
     audioRef.current = audio;
 
+    let mounted = true;
+
     const startMusic = async () => {
-      if (playingRef.current || startingRef.current) return;
+      if (
+        !mounted ||
+        playingRef.current ||
+        startingRef.current
+      ) {
+        return;
+      }
 
       startingRef.current = true;
 
       try {
+        // Try the original MP3 first.
         await audio.play();
+
+        if (!mounted) {
+          audio.pause();
+          return;
+        }
+
         sourceRef.current = 'mp3';
         playingRef.current = true;
         setIsPlaying(true);
-      } catch {
+
+      } catch (mp3Error) {
+        console.warn(
+          'MP3 playback failed; trying synthesized audio.',
+          mp3Error
+        );
+
         try {
           await anbilAvanEngine.play();
+
+          if (!mounted) {
+            await anbilAvanEngine.pause();
+            return;
+          }
+
           sourceRef.current = 'synth';
           playingRef.current = true;
           setIsPlaying(true);
-        } catch {
-          // Browser requires user interaction.
+
+        } catch (synthError) {
+          console.info(
+            'Autoplay may require user interaction.',
+            synthError
+          );
         }
       } finally {
         startingRef.current = false;
       }
     };
 
-    // Attempt autoplay on page load.
+    // Attempt autoplay on initial page load.
     void startMusic();
 
     // Retry when the visitor first interacts with the page.
@@ -53,11 +90,21 @@ export const AudioPlayer: React.FC = () => {
     window.addEventListener('keydown', handleInteraction);
 
     return () => {
-      window.removeEventListener('pointerdown', handleInteraction);
-      window.removeEventListener('keydown', handleInteraction);
+      mounted = false;
+
+      window.removeEventListener(
+        'pointerdown',
+        handleInteraction
+      );
+
+      window.removeEventListener(
+        'keydown',
+        handleInteraction
+      );
 
       audio.pause();
       audioRef.current = null;
+
       void anbilAvanEngine.pause();
 
       playingRef.current = false;
@@ -71,10 +118,12 @@ export const AudioPlayer: React.FC = () => {
   ) => {
     e.stopPropagation();
 
+    const audio = audioRef.current;
+
     if (playingRef.current) {
       if (sourceRef.current === 'mp3') {
-        audioRef.current?.pause();
-      } else {
+        audio?.pause();
+      } else if (sourceRef.current === 'synth') {
         await anbilAvanEngine.pause();
       }
 
@@ -84,34 +133,52 @@ export const AudioPlayer: React.FC = () => {
       return;
     }
 
-    // Try the MP3 first, then the synthesizer.
+    if (startingRef.current) return;
+
+    startingRef.current = true;
+
     try {
-      if (!audioRef.current) return;
+      if (audio) {
+        // Try MP3 playback first.
+        try {
+          await audio.play();
 
-      await audioRef.current.play();
-      sourceRef.current = 'mp3';
-    } catch {
-      try {
-        await anbilAvanEngine.play();
-        sourceRef.current = 'synth';
-      } catch {
-        setIsPlaying(false);
-        return;
+          sourceRef.current = 'mp3';
+
+        } catch {
+          // Fall back to the synthesized melody.
+          await anbilAvanEngine.play();
+
+          sourceRef.current = 'synth';
+        }
+
+        playingRef.current = true;
+        setIsPlaying(true);
       }
+    } catch (error) {
+      console.error('Unable to start background music:', error);
+      playingRef.current = false;
+      sourceRef.current = null;
+      setIsPlaying(false);
+    } finally {
+      startingRef.current = false;
     }
-
-    playingRef.current = true;
-    setIsPlaying(true);
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 select-none">
       <button
         onClick={toggleMusic}
-        aria-label={isPlaying ? 'Pause Background Music' : 'Play Background Music'}
+        aria-label={
+          isPlaying
+            ? 'Pause Background Music'
+            : 'Play Anbil Avan Wedding Music'
+        }
+        aria-pressed={isPlaying}
         title={isPlaying ? 'Pause Music' : 'Play Anbil Avan BGM'}
         className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-[#3B0910] via-[#230408] to-[#120204] border-2 border-[#D4AF37]/80 text-[#F5E6A8] shadow-[0_0_30px_rgba(212,175,55,0.35)] hover:scale-110 hover:border-[#D4AF37] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] cursor-pointer"
       >
+        {/* Animated ring while music is playing */}
         {isPlaying && (
           <span className="absolute inset-0 rounded-full border-2 border-[#D4AF37] animate-ping opacity-30 pointer-events-none" />
         )}
@@ -125,7 +192,7 @@ export const AudioPlayer: React.FC = () => {
           </div>
         ) : (
           <div className="flex items-center gap-1">
-            <Music className="w-5 h-5 text-[#D4AF37]" />
+            <Music className="w-5 h-5 text-[#D4AF37] group-hover:text-[#F5E6A8] transition-colors" />
             <VolumeX className="w-3.5 h-3.5 text-[#D4AF37]/70" />
           </div>
         )}
