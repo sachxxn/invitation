@@ -8,44 +8,59 @@ const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const unlockedRef = useRef(false);
 
-  // Step 1: Start MUTED immediately on mount (always allowed by every browser)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.muted = true;
+    // Ensure volume is set
     audio.volume = 0.75;
-    audio.play().catch(() => {});
+
+    // Try to start playing immediately (muted via HTML attribute)
+    audio.play().catch(() => {
+      // Silently ignore — interaction listeners will handle it
+    });
 
     const unmute = () => {
       if (unlockedRef.current) return;
       unlockedRef.current = true;
+
       audio.muted = false;
-      if (audio.paused) audio.play().catch(() => {});
-      // Remove all listeners once unlocked
-      window.removeEventListener('scroll', unmute);
-      window.removeEventListener('click', unmute);
-      window.removeEventListener('touchstart', unmute);
-      window.removeEventListener('pointerdown', unmute);
+      audio.volume = 0.75;
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      }
+
+      // Remove all listeners after first unlock
+      document.removeEventListener('click',       unmute, true);
+      document.removeEventListener('touchstart',  unmute, true);
+      document.removeEventListener('touchend',    unmute, true);
+      document.removeEventListener('pointerdown', unmute, true);
+      document.removeEventListener('keydown',     unmute, true);
+      window.removeEventListener('scroll',        unmute);
     };
 
-    // Step 2: Unmute on ANY user interaction — click, scroll, touch, pointer
-    window.addEventListener('scroll',      unmute, { passive: true });
-    window.addEventListener('click',       unmute);
-    window.addEventListener('touchstart',  unmute, { passive: true });
-    window.addEventListener('pointerdown', unmute);
+    // Use capture:true so events are caught BEFORE any element handles them
+    document.addEventListener('click',       unmute, { capture: true });
+    document.addEventListener('touchstart',  unmute, { capture: true, passive: true });
+    document.addEventListener('touchend',    unmute, { capture: true, passive: true });
+    document.addEventListener('pointerdown', unmute, { capture: true });
+    document.addEventListener('keydown',     unmute, { capture: true });
+    window.addEventListener('scroll',        unmute, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll',      unmute);
-      window.removeEventListener('click',       unmute);
-      window.removeEventListener('touchstart',  unmute);
-      window.removeEventListener('pointerdown', unmute);
+      document.removeEventListener('click',       unmute, true);
+      document.removeEventListener('touchstart',  unmute, true);
+      document.removeEventListener('touchend',    unmute, true);
+      document.removeEventListener('pointerdown', unmute, true);
+      document.removeEventListener('keydown',     unmute, true);
+      window.removeEventListener('scroll',        unmute);
       audio.pause();
       audio.src = '';
     };
   }, []);
 
-  // Step 3: Unmute when preloader finishes (no interaction needed)
+  // Unmute when preloader signals done (works even without interaction)
   useEffect(() => {
     if (!unlocked) return;
     const audio = audioRef.current;
@@ -53,13 +68,18 @@ const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
 
     unlockedRef.current = true;
     audio.muted = false;
+    audio.volume = 0.75;
     if (audio.paused) audio.play().catch(() => {});
   }, [unlocked]);
 
   return (
+    // autoPlay + muted are HTML-level attributes — most trusted by browsers
+    // playsInline prevents fullscreen on iOS Safari
     <audio
       ref={audioRef}
       src="/audio/anbil_avan.mp3"
+      autoPlay
+      muted
       loop
       playsInline
       preload="auto"
