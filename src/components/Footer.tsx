@@ -74,8 +74,11 @@ export const Footer: React.FC<Props> = ({ isTamil }) => {
         </div>
 
         {/* Footer Bottom Line */}
-        <div className="pt-8 border-t border-[#D4AF37]/15 text-[11px] text-[#D4AF37]/60 font-montserrat">
+        <div className="pt-8 border-t border-[#D4AF37]/15 text-[11px] text-[#D4AF37]/60 font-montserrat space-y-2">
           <p>© 2026 N. Kaaviya & R.V. Thyaneshwar Royal Wedding Invitation. All rights reserved.</p>
+          <p className="text-[#D4AF37]/50 tracking-widest uppercase text-[10px]">
+            ✦ Created by <span className="text-[#D4AF37]/80 font-semibold">SY Creation</span> ✦
+          </p>
         </div>
 
       </div>
