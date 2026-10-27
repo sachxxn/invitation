@@ -7,7 +7,6 @@ import { HeroSection } from './components/HeroSection';
 import { InvitationReveal } from './components/InvitationReveal';
 import { CoupleSection } from './components/CoupleSection';
 import { EventsTimeline } from './components/EventsTimeline';
-
 import { Countdown } from './components/Countdown';
 import { FamilySection } from './components/FamilySection';
 import { VenueSection } from './components/VenueSection';
@@ -18,18 +17,15 @@ import AudioPlayer from './components/AudioPlayer';
 export function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isTamil, setIsTamil] = useState(false);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   const handlePreloaderComplete = () => {
     setIsLoaded(true);
-    // Preloader finishing = safe moment to unmute audio
-    setAudioUnlocked(true);
   };
 
   return (
     <div className="min-h-screen bg-[#0D0204] text-[#F9F6F0] selection:bg-[#D4AF37]/30 selection:text-[#F3E5AB]">
-      {/* Background Music — plays muted instantly, unmutes after preloader */}
-      <AudioPlayer unlocked={audioUnlocked} />
+      {/* Background Music — starts on the first user click */}
+      <AudioPlayer />
 
       {/* Royal Preloader */}
       {!isLoaded && (
@@ -41,42 +37,32 @@ export function App() {
       )}
 
       {/* Main Website Content */}
-      <div className={`transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Navigation Bar */}
+      <div
+        className={`transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+      >
         <Navbar
           isTamil={isTamil}
           onToggleLanguage={() => setIsTamil(!isTamil)}
         />
 
-        {/* Hero Landing */}
         <HeroSection isTamil={isTamil} />
 
-        {/* Unfolding Invitation Card */}
         <InvitationReveal isTamil={isTamil} />
 
-        {/* Live Muhurtham Countdown */}
         <Countdown isTamil={isTamil} />
 
-        {/* Bride & Groom Spotlight */}
         <CoupleSection isTamil={isTamil} />
 
-        {/* 4 Sacred Events Timeline */}
         <EventsTimeline isTamil={isTamil} />
 
-
-        {/* Family Lineage & Blessings */}
         <FamilySection isTamil={isTamil} />
 
-        {/* Venue & Interactive Map */}
         <VenueSection isTamil={isTamil} />
 
-        {/* Interactive RSVP Form */}
         <RSVP isTamil={isTamil} />
 
-        {/* Footer */}
         <Footer isTamil={isTamil} />
-
-
       </div>
     </div>
   );
