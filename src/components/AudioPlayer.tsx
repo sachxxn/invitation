@@ -1,85 +1,50 @@
 import React, { useEffect, useRef } from 'react';
 
-interface Props {
-  unlocked: boolean;
-}
-
-const AudioPlayer: React.FC<Props> = ({ unlocked }) => {
+const AudioPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const unlockedRef = useRef(false);
+  const hasStarted = useRef(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Ensure volume is set
     audio.volume = 0.75;
 
-    // Try to start playing immediately (muted via HTML attribute)
-    audio.play().catch(() => {
-      // Silently ignore — interaction listeners will handle it
-    });
+    const startMusic = async () => {
+      if (hasStarted.current) return;
 
-    const unmute = () => {
-      if (unlockedRef.current) return;
-      unlockedRef.current = true;
+      // Prevent multiple playback attempts.
+      hasStarted.current = true;
 
-      audio.muted = false;
-      audio.volume = 0.75;
-
-      if (audio.paused) {
-        audio.play().catch(() => {});
+      try {
+        audio.muted = false;
+        await audio.play();
+      } catch (error) {
+        hasStarted.current = false;
+        console.error('Unable to start music:', error);
       }
-
-      // Remove all listeners after first unlock
-      document.removeEventListener('click',       unmute, true);
-      document.removeEventListener('touchstart',  unmute, true);
-      document.removeEventListener('touchend',    unmute, true);
-      document.removeEventListener('pointerdown', unmute, true);
-      document.removeEventListener('keydown',     unmute, true);
-      window.removeEventListener('scroll',        unmute);
     };
 
-    // Use capture:true so events are caught BEFORE any element handles them
-    document.addEventListener('click',       unmute, { capture: true });
-    document.addEventListener('touchstart',  unmute, { capture: true, passive: true });
-    document.addEventListener('touchend',    unmute, { capture: true, passive: true });
-    document.addEventListener('pointerdown', unmute, { capture: true });
-    document.addEventListener('keydown',     unmute, { capture: true });
-    window.addEventListener('scroll',        unmute, { passive: true });
+    // Play music when the user clicks anywhere on the website.
+    document.addEventListener('click', startMusic, true);
+
+    // Also support the first tap on mobile devices.
+    document.addEventListener('touchstart', startMusic, {
+      capture: true,
+      passive: true,
+    });
 
     return () => {
-      document.removeEventListener('click',       unmute, true);
-      document.removeEventListener('touchstart',  unmute, true);
-      document.removeEventListener('touchend',    unmute, true);
-      document.removeEventListener('pointerdown', unmute, true);
-      document.removeEventListener('keydown',     unmute, true);
-      window.removeEventListener('scroll',        unmute);
+      document.removeEventListener('click', startMusic, true);
+      document.removeEventListener('touchstart', startMusic, true);
       audio.pause();
-      audio.src = '';
     };
   }, []);
 
-  // Unmute when preloader signals done (works even without interaction)
-  useEffect(() => {
-    if (!unlocked) return;
-    const audio = audioRef.current;
-    if (!audio || unlockedRef.current) return;
-
-    unlockedRef.current = true;
-    audio.muted = false;
-    audio.volume = 0.75;
-    if (audio.paused) audio.play().catch(() => {});
-  }, [unlocked]);
-
   return (
-    // autoPlay + muted are HTML-level attributes — most trusted by browsers
-    // playsInline prevents fullscreen on iOS Safari
     <audio
       ref={audioRef}
       src="/audio/anbil_avan.mp3"
-      autoPlay
-      muted
       loop
       playsInline
       preload="auto"

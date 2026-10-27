@@ -172,7 +172,7 @@ export const weddingData: WeddingConfig = {
 
   groomLineage: {
     greatGrandParents: "தெய்வத்திருவாளர்கள் Ve.Ra. ராஜமாணிக்கம் முதலியார் — கண்ணம்மாள்",
-    grandParents: "தெய்வத்திரு. D.V. ராமலிங்கம் முதலியார் — தெய்வத்திருமதி. ராணியம்மாள் (அச்சரப்பாக்கம்)",
+    grandParents: "D.V. ராமலிங்கம் முதலியார் — தெய்வத்திருமதி. ராணியம்மாள் (அச்சரப்பாக்கம்)",
     parents: "திரு. T.R. வெங்கடேஷ் & திருமதி. D.R. உமாசங்கரி",
     parentsEnglish: "Mr. T.R. Venkatesh & Mrs. D.R. Umashankari",
     location: "தேசுமுகிப்பேட்டை, திருக்கழுக்குன்றம்"

@@ -129,7 +129,7 @@ export const FamilySection: React.FC<Props> = ({ isTamil }) => {
                     Grandparents • பாட்டனார் - பாட்டியார்
                   </span>
                   <div className="font-tamil text-xs sm:text-sm leading-relaxed text-[#F3E5AB]/90 space-y-0.5">
-                    <p>தெய்வத்திரு. D.V. ராமலிங்கம் முதலியார்</p>
+                    <p>திரு. D.V. ராமலிங்கம் முதலியார்</p>
                     <p>தெய்வத்திருமதி. ராணியம்மாள்</p>
                     <p className="text-[#F3E5AB]/75 text-[11px] sm:text-xs pt-0.5">(அச்சரப்பாக்கம்)</p>
                   </div>
